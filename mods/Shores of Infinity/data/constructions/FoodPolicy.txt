@@ -1,0 +1,20 @@
+Construction: FoodPolicy
+	Name: #C_FOOD_POLICY
+	Description: #C_FOOD_POLICY_DESC
+
+	Icon: ResourceIconsSmall::20
+
+	Category: Policies
+	In Context: True
+
+	Build Cost: 600
+	Time Cost: 540
+
+	ConsumeInfluence(20)
+
+	RequireNotTrait(Mechanoid)
+	RequireNotTrait(Ancient)
+	addon_requirement_effects::RequirePopulation()
+	addon_requirement_effects::RequireNativeResource(Grain, Primary = False, Hide = True)
+
+	GainInfluenceCard(Harvest)

@@ -1,0 +1,64 @@
+Technology: HabitatModule
+	Name: #R_SYS_HABITAT_MODULE
+	Description: #R_SYS_HABITAT_MODULE_DESC
+
+	Icon: SupportCommand * #edbb99
+	Color: #edbb99
+
+	Category: Equipment - Support
+	Class: Unlock
+
+	Point Cost: 600
+	Time Cost: 120
+
+	SkipOnUnlockedSubsystem(HabitatModule)
+	UnlockSubsystem(HabitatModule)
+	ModAttribute(ProgenitorTechProgress, Add, 1.5)
+
+Technology: MechanoidHabitatModule
+	Name: #R_MECHANOID_HABITAT_MODULE
+	Description: #R_MECHANOID_HABITAT_MODULE_DESC
+
+	Icon: FtlIcon
+	Color: #00ff00
+
+	Point Cost: 600
+	Time Cost: 120
+
+	Category: Racial/DLC Replacements (DO NOT PLACE)
+	Class: BigUpgrade
+
+	UnlockTag(MechanoidHabitatModule)
+
+Technology: StarHabitatModule
+	Name: #R_STAR_HABITAT_MODULE
+	Description: #R_STAR_HABITAT_MODULE_DESC
+
+	Icon: SupportCommand * #edbb99
+	Color: #edbb99
+
+	Point Cost: 600
+	Time Cost: 120
+
+	Category: Racial/DLC Replacements (DO NOT PLACE)
+	Class: BigUpgrade
+
+	AddModifier(StarHabitatModule::HabitatPopulationFactor(1.2))
+	ModAttribute(ProgenitorTechProgress, Add, 1.5)
+
+Technology: AncientHabitatModule
+	Name: #R_ANCIENT_HABITAT_MODULE
+	Description: #R_ANCIENT_HABITAT_MODULE_DESC
+
+	Icon: ComputerCore * #626567
+	Color: #626567
+
+	Point Cost: 600
+	Time Cost: 120
+
+	Category: Equipment - Support
+	Class: Unlock
+
+	SkipOnUnlockedSubsystem(AncientReplicator)
+	UnlockSubsystem(AncientReplicator)
+	ModAttribute(ProgenitorTechProgress, Add, 1.5)

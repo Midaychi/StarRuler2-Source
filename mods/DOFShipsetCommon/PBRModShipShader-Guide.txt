@@ -1,0 +1,79 @@
+Shaders
+=======
+
+The DOF Shipset Common Library contains prelimary versions of these shaders. As such, they have been renamed so that they do not conflict with the official versions if/when they are patched into the game itself.
+
+DOFShaderName - (OfficialShaderName) - Description
+
+PBRModShipS - (PBRShipSingleMat) - Single texture PBR mod-friendly shader.
+PBRModShipSS - (PBRShipSingleMatShield) - Single texture PBR mod-friendly shader with support for shield effects.
+PBRModShipM - (PBRShipMultiMat) - Limited multi-texture PBR mod-friendly shader. Supports an additional "bits" texture. Useful for saving filesize when you have an additional detail texture of lower resolution than the primary texture.
+PBRModShipMS - (PBRShipMultiMatShield) - Limited multi-texture (as above) PBR mod-friendly shader with support for shield effects.
+
+Textures
+========
+
+//Material Setup
+
+For single texture:
+Material: ExampleSingleTexture
+	Shader: PBRModShipS
+	Blend: Alpha	
+	Texture:  data/shipsets/mod/albedo.png
+	Texture2: data/shipsets/mod/normal.png
+	Texture3: data/shipsets/mod/masks.png
+	Texture4: data/shipsets/DOFCommon/damage_tiler.png	
+	Cubemap5: data/images/skycube.png
+
+For multi-textures:
+Material: ExampleMultiTexture
+	Shader: PBRModShipM
+	Blend: Alpha	
+	Texture:  data/shipsets/mod/albedo.png
+	Texture2: data/shipsets/mod/normal.png
+	Texture3: data/shipsets/mod/masks.png
+	Texture4: data/shipsets/mod/albedo_bits.png
+	Texture5: data/shipsets/mod/normal_bits.png
+	Texture6: data/shipsets/mod/masks_bits.png
+	Texture7: data/shipsets/DOFCommon/damage_tiler.png	
+	Cubemap8: data/images/skycube.png
+
+Shield variants are the same as their respective single/multi texture setup.
+
+//Albedo Texture
+
+-Start with standard Diffuse/Color texture.
+-Thrusters visual (the diffuse color "light" effect) should be removed if using the thruster map in the Masks texture.
+-Apply Hue/Saturation adjustment of +25 saturation and +25 lightness.
+-Alpha Channel is "Metalness". White is max.
+
+//Normal Texture
+
+-Start with a typical Normal texture.
+-Remove the Blue Channel.
+-Blue Channel is "Roughness". White is dull/matte, black is glossy.
+-Alpha Channel is the Specular map. White is max. Mostly covered by Metalness and can be omitted but useful for brightening dark texture sections.
+
+Tip: If your ship turns out very dark in-game, you may want to adjust your Roughness texture. If it is predominantly on the darker side, then light reflection will be very focused and only ambient light will be applied to the rest. So far in practice I am finding that values above 0.4 (RGB value 64) work well but it may depend on your particular set of textures and model. A strong specular map may also help lighten up very dark sections.
+
+//Masks Textures
+
+-R is Lights. White is max.
+-B is Thrusters. White is max.
+-G is Teamcolor. White is max.
+-Alpha is Ambient Occlusion. Black is max occlusion. Reduces ambient lighting. Useful for shading effects in recessed areas.
+
+UV Map
+======
+
+//General
+
+-UVs should be contained within the albedo map if you're planning to use Multitexture support for Bits texture or Shields.
+-Bits texture will use UVs in -Y space (if your UV map is 1000 tall, then Y 0 to -1000 are the bits texture area). UV mapping should be the same scale as the main texture but the bits texture files can be smaller.
+-Shields will use UVs in -X space (if your UV map is 1000 wide, then X 0 to -1000 are the shield effect area).
+
+//Shield Effects
+
+-Shield effect panels (planar objects) can be added as new objects to the model.
+-May require duplicating the main object (delete the original) to fix geometry order.
+-Shield effects should not overlap. If you have a scenario where one shield effect is visible through another, then you should build in some geometry to obstruct the view.

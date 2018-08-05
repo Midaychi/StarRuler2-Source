@@ -1,0 +1,63 @@
+System: HomeSystem
+
+	//SoI - Scaling
+	MakeStar(Temperature = 400:13000, Radius = 650:850)
+		BonusHealth(20000000000)
+
+		//SoI - Scaling
+		ExpandSystem(1850:2850)
+
+	RepeatHomeworlds()
+
+		//SoI - Scaling
+		MakePlanet(Resource = RandomType:Food:Common, Radius = 100, Grid Size = (18, 11), Conditions = False, Moons = False)
+			BonusHealth(5000000000)
+			AddPlanetResource(Water)
+			AddPopulation(3.0)
+			SpawnBuilding(Factory, (4, 3), Develop = True)
+			NoNeedPopulationForLevel()
+			ForceUsefulSurface(0.8, Forest)
+			MakeMoon()
+
+	MakePlanet(Resource = RandomType:Food:Common, Conditions = False, Moons = False)
+	MakePlanet(Resource = Water, Conditions = False, Moons = False)
+	MakePlanet(Resource = RandomLevel:1:Common, Conditions = False, Moons = False)
+	MakePlanet(Resource = Ammonia, Secondary Resource = Ruled, Classification = Gas, Giant = True, Force Native Biome = True, Add Status = GasGiant)
+	MakePlanet(Resource = RareGases, Secondary Resource = Ruled, Classification = Gas, Giant = True, Force Native Biome = True, Add Status = GasGiant)
+	MakePlanet(Resource = IcyWater, Secondary Resource = Ruled, Classification = Icy, Giant = True, Force Native Biome = True, Add Status = IceGiant)
+	MakePlanet(Resource = IcyPekelm, Secondary Resource = Ruled, Classification = Icy, Giant = True, Force Native Biome = True, Add Status = IceGiant)
+
+	MakeAsteroid(Cargo = Ore, Cargo Amount = 1200)
+	MakeAsteroid(Cargo = Ore, Cargo Amount = 1200)
+	MakeAsteroid(Cargo = Ore, Cargo Amount = 1150)
+	MakeAsteroid(Cargo = Ore, Cargo Amount = 1050)
+	MakeAsteroid(Cargo = Ore, Cargo Amount = 685)
+	MakeAsteroid(Cargo = Ore, Cargo Amount = 465)
+	MakeAsteroid(Cargo = Ore, Cargo Amount = 250)
+	MakeAsteroid(Resource = Distributed)
+	MakeAsteroid(Resource = Pekelm)
+		ActiveConfigOption(QUICK_START)
+			SetMine()
+	MakeAsteroid(Resource = AsteroidFTLPermanent)
+		ActiveConfigOption(QUICK_START)
+			SetMine()
+
+	MakeAnomaly()
+	MakeArtifact(Type = Comet)
+
+	GuaranteeAdjacentResource(RandomType:Food:Common, Distance = 2)
+	GuaranteeAdjacentResource(RandomType:Food:Common, Distance = 2)
+	GuaranteeAdjacentResource(RandomLevel:1:Common, Distance = 2)
+	GuaranteeAdjacentResource(RandomType:Food:Common, Distance = 3)
+	GuaranteeAdjacentResource(RandomLevel:2:Common, Distance = 3)
+
+	MakeAdjacentAsteroid(Resource = Distributed)
+	MakeAdjacentAsteroid(Resource = Explosives)
+	MakeAdjacentAsteroid(Resource = Neutronium)
+	MakeAdjacentAsteroid(Resource = Distributed, Farther = True)
+	MakeAdjacentAsteroid(Resource = AsteroidFTLPermanent, Farther = True)
+
+	AddAdjacentArtifacts(2)
+	MakeAdjacentCreepCamp(SmallCamp, Place Far = True)
+
+	ExpandSystem(1000)

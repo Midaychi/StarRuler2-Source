@@ -1,0 +1,56 @@
+Module: Starport
+	Name: #ORB_STARPORT
+	Blurb: #ORB_STARPORT_BLURB
+	Description: #ORB_STARPORT_DESC
+
+	Icon: GuiOrbitalIcons::15
+	Strategic Icon: OrbitalIcons::15
+	Model: CommerceStation
+	Material: GenericPBR_CommerceStation
+
+	Size: 14
+
+	Standalone: False
+	Core: True
+
+	Health: 15000
+	Armor: 5000
+
+	Build Cost: 300
+	Maintenance: 70
+	Labor Cost: 15
+
+	LimitOncePerSystem(StarportFlag)
+
+	AddCargoStorage(2500)
+
+	SetSystemFlag(Starport)
+
+	AddFleetCommand(64)
+	AddFleetCommandEmpireAttribute(OutpostBoost, 64)
+
+	AllowConstruction()
+	GiveTrade()
+	FriendlyPlanetMoney(To Self = 30, To Other = 30, Count Self = True, Max Money = 120)
+	addon_generic_effects::AddStatusToPlanetsInSystem(Starport, Set Origin Empire = True, Only Owned = True)
+
+	AI: RegisterForUse(Starport)
+
+Module: StarportDockingBays
+	Name: #ORB_STARPORT_DOCKING_BAYS
+	Description: #ORB_STARPORT_DOCKING_BAYS_DESC
+
+	Icon: ActionBarIcons::2
+
+	Standalone: False
+	Core: False
+
+	Build Cost: 200
+	Maintenance: 130
+
+	ConsumeInfluence(5)
+
+	RequireOnOrbital(Starport)
+
+	GlobalTradeNode()
+	AddStatus(StarportDockingBays)

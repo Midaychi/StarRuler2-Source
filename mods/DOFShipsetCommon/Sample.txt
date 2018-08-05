@@ -1,0 +1,19 @@
+Subsystem: HLCustomizationSample
+	Description: <<
+		Boilerplate hex limit customization code, configured to do the following things:
+
+		- Add 15 hexes to support ships.
+		- Add 78 hexes to flagships.
+		- Remove 57 hexes from stations.
+		- Not interfere with Titan Hulls or similar multiplicative modifiers. (It won't fulfill its intended purpose of matching the hex limit to the ship's shape, but it won't break THAT badly, either.)
+
+		The numbers in this case are precisely as random as they seem. The customization is now enabled by the Hex Limit Modifier instead of defaulting to active.
+	>>
+
+	Tags: DefaultUnlock, NoCore, HullSystem
+	EvaluationOrder: -200
+	Hull: Flagship,Support,Station
+
+	SupportHexes := 15
+	FlagshipHexes := 78
+	StationHexes := -57

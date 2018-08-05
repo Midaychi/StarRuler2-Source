@@ -1,0 +1,15 @@
+Technology: KeyRailgunKnockback
+	Name: #R_KEY_RAILGUN_KNOCKBACK
+	Description: #R_KEY_RAILGUN_KNOCKBACK_DESC
+
+	Icon: Railgun::3
+	Color: #238f59
+
+	Point Cost: 750
+	Time Cost: 120
+
+	Category: Special Upgrades
+	Class: BigUpgrade
+
+	AddModifier(RailgunBattery::AddRailgunKnockback(5))
+	ReduceResearchPenalty(750)

@@ -1,0 +1,59 @@
+Module: StagingHub
+	Name: #ORB_STAGING_HUB
+	Blurb: #ORB_STAGING_HUB_BLURB
+	Description: #ORB_STAGING_HUB_DESC
+
+	Icon: GuiOrbitalIcons::15
+	Strategic Icon: OrbitalIcons::15
+	Model: CommerceStation
+	Material: GenericPBR_CommerceStation
+
+	Size: 8
+
+	Standalone: False
+	Core: True
+
+	Health: 6000
+	Armor: 4000
+
+	Build Cost: 200
+	Maintenance: 20
+	Labor Cost: 10
+
+	RequireNotTrait(Ancient)
+
+	AddFleetCommand(32)
+	AddFleetCommandEmpireAttribute(OutpostBoost, 32)
+
+	AllowConstruction(Asteroids = True)
+
+	AddLaborFactor(-0.5)
+	AllowLaborImport()
+	ForbidLaborExport()
+
+	GiveTrade()
+
+	AddStatusToOrbitingPlanet(StagingHub, Set Origin Empire = True, Only Owned = True)
+
+	AddCargoStorage(5000)
+
+Module: StagingHubMarket
+	Name: #ORB_STAGING_HUB_MARKET
+	Description: #ORB_STAGING_HUB_MARKET_DESC
+
+	Icon: ResourceIcon::0
+
+	Standalone: False
+	Core: False
+
+	Build Cost: 150
+	Maintenance: 10
+
+	RequireOnOrbital(StagingHub)
+
+	AllowResourceImport()
+	RepeatPressure(Influence, TriggerPeriodic(AddMoney(5), Interval = 60.0))
+	RepeatPressure(Energy, TriggerPeriodic(AddMoney(5), Interval = 60.0))
+	RepeatPressure(Research, TriggerPeriodic(AddMoney(5), Interval = 60.0))
+	RepeatPressure(Defense, TriggerPeriodic(AddMoney(5), Interval = 60.0))
+	AddStatus(StagingHubMarket)

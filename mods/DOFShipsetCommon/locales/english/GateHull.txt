@@ -1,0 +1,2 @@
+GATEHULL: Stargate Integration
+ERROR_GATEHULL: $1 can only be used on a Gate. Use a different hull for your design, or add a Gate Module.

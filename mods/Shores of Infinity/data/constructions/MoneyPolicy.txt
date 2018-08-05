@@ -1,0 +1,17 @@
+Construction: MoneyPolicy
+	Name: #C_MONEY_POLICY
+	Description: #C_MONEY_POLICY_DESC
+
+	Icon: AffinityIcons::10
+
+	Category: Policies
+	In Context: True
+
+	Build Cost: 200
+	Time Cost: 540
+
+	ConsumeInfluence(15)
+
+	addon_requirement_effects::RequirePopulation()
+
+	GainInfluenceCard(Profiteering, Quality = 0:2)

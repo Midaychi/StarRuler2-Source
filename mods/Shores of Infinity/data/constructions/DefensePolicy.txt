@@ -1,0 +1,18 @@
+Construction: DefensePolicy
+	Name: #C_DEFENSE_POLICY
+	Description: #C_DEFENSE_POLICY_DESC
+
+	Icon: AttributeIcons::4
+
+	Category: Policies
+	In Context: True
+
+	Build Cost: 250
+	Time Cost: 540
+
+	ConsumeInfluence(5)
+
+	RequireNotTrait(Pacifists)
+	addon_requirement_effects::RequirePopulation()
+
+	GainInfluenceCard(Uprising, Quality = 0:2)

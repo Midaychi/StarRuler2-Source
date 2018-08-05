@@ -1,0 +1,42 @@
+Subsystem: ColonizationPods
+	Name: #S_COLONIZATIONPODS
+	Description: #S_COLONIZATIONPODS_DESC
+	BaseColor: #ffffff
+	TypeColor: #ffffff
+	Elevation: 2
+
+	Tags: DefaultUnlock, Category:Equipment, Settlers, NonContiguous, NoCore
+	Tags: Ability:ColonizationPods
+	Tags: HasInternals
+	Hull: Flagship
+
+	Hex.LaborCost := 0.30 * HexSize + 0.8
+	Hex.BuildCost := 1.5 * HexSize + 2
+	Hex.MaintainCost := 1.2 * HexSize + 2 - (4 * HexSize / ShipSize^0.5)
+
+	Size := HexSize * Hexes
+	Hex.Mass := HexSize
+
+	SettlerPop := floor(Size / 1088)
+
+	SettlerCost := 250 * SettlerPop
+	SettlerLabor := 10 * SettlerPop
+	ShipPopStorage := SettlerPop
+
+	Hex.HP := 18 * HexSize
+	Hex.Resistance := 0.2
+
+	Hook: LimitStatusStacks(Settlers, SettlerPop)
+
+	Requires:
+		Command = ceil(Hexes * 0.6)
+
+	Assert: SettlerPop >= 1
+		Unique: True
+		Message: #ERROR_TOO_SMALL
+
+	Module: Default
+		Hex.BuildCost := Hex.BuildCost + (SettlerCost / Hexes)
+		Hex.LaborCost := Hex.LaborCost + (SettlerLabor / Hexes)
+
+		Sprite: TroopPods * #d6eaf8

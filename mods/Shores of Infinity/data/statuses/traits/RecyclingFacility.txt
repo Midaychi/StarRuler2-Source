@@ -1,0 +1,7 @@
+Status:RecyclingFacility
+	Visible To: Nobody
+	Collapses: True
+
+	AddPlanetResource(BuildingWater)
+	AddInfluenceStake(1)
+	AddEnergyIncome(1)

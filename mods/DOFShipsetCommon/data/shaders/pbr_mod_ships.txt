@@ -1,0 +1,173 @@
+	
+//	
+//	Material setup examples
+//	
+//	albedo(is NOT diffuse) is albedo colors , the true unshaded hue of a surface, in rgb with emissive lights optionally baked in, alpha is metalness (metalness can be ignored - but will make the whole ship metallic if done so, except for team paint)
+//	normal is normal map x and y in r and g, roughness(0 is sharp reflection, 1 is dull everything in between is legit) in blue. Alpha is specular that have little effect on high and extreme shading, if you have none you can skip it.
+//	masks is emissive mask in r, team paint in g, and engine masking for procedural blackbody engine effects in b. Alpha is ambient occlusion(if you have non you can skip this channel)
+//	
+//
+//	Material: ExampleMultiMatShield
+//		Shader: PBRModShipMS
+//		Blend: Alpha	
+//		Texture:  data/shipsets/mod/albedo_main.png
+//		Texture2: data/shipsets/mod/normal_main.png
+//		Texture3: data/shipsets/mod/masks_main.png
+//		Texture4: data/shipsets/mod/albedo_bits.png
+//		Texture5: data/shipsets/mod/normal_bits.png
+//		Texture6: data/shipsets/mod/masks_bits.png
+//		Texture7: data/shipsets/mod/damage_tiler.png	
+//		Cubemap8: data/images/skycube.png
+//		
+//		
+//	Material: ExampleMultiMat
+//		Shader: PBRModShipM
+//		Texture:  data/shipsets/mod/albedo_main.png
+//		Texture2: data/shipsets/mod/normal_main.png
+//		Texture3: data/shipsets/mod/masks_main.png
+//		Texture4: data/shipsets/mod/albedo_bits.png
+//		Texture5: data/shipsets/mod/normal_bits.png
+//		Texture6: data/shipsets/mod/masks_bits.png
+//		Texture7: data/shipsets/mod/damage_tiler.png	
+//		Cubemap8: data/images/skycube.png
+//	
+//		
+//	Material: ExampleSingleMatShield
+//		Shader: PBRModShipSS
+//		Blend: Alpha	
+//		Texture:  data/shipsets/mod/albedo_main.png
+//		Texture2: data/shipsets/mod/normal_main.png
+//		Texture3: data/shipsets/mod/masks_main.png
+//		Texture4: data/shipsets/mod/damage_tiler.png	
+//		Cubemap5: data/images/skycube.png	
+//	
+//		
+//	Material: ExampleSingleMat
+//		Shader: PBRModShipS
+//		Texture:  data/shipsets/mod/albedo_main.png
+//		Texture2: data/shipsets/mod/normal_main.png
+//		Texture3: data/shipsets/mod/masks_main.png
+//		Texture4: data/shipsets/mod/damage_tiler.png	
+//		Cubemap5: data/images/skycube.png
+//		
+//	
+
+//Shader: PBRShipMultiMatShield
+Shader: PBRModShipMS
+    Vertex: data/shaders/source/pbr_modship_common_vs.txt
+    Fragment: data/shaders/source/pbr_modship_ms_ps.txt
+	// makes it reload when shader level settings are changed
+    Settings Reload: True
+ 
+	// main textures
+    Variable: tex diffuseM = 0
+    Variable: tex normalsM = 1
+    Variable: tex masksM = 2
+	// bits textures
+    Variable: tex diffuseB = 3
+    Variable: tex normalsB = 4
+    Variable: tex masksB = 5
+	// damage texture
+	Variable: tex damageT = 6
+	// cubemap texture - must be cubemap!!
+    Variable: tex skybox = 7
+
+	// engine data needed
+    Variable: float time = game_time
+	Variable: vec2 texSize = tex_size 1 	
+    Variable: vec4 ownerColor = node_color
+    Variable: float camDist = node_distance
+    Variable: float nodeScale = node_scale
+	Variable: vec4 damage = obj_quadrant_damage
+    Variable: float[2] lightRadius = light_radius 0 1
+    Variable: vec4 wsRot = node_rotation
+    Variable: float acceleration = obj_acceleration
+    Variable: float velocity = obj_velocity
+
+//Shader: PBRShipMultiMat
+Shader: PBRModShipM
+    Vertex: data/shaders/source/pbr_modship_common_vs.txt
+    Fragment: data/shaders/source/pbr_modship_m_ps.txt
+	// makes it reload when shader level settings are changed
+    Settings Reload: True
+ 
+	// main textures
+    Variable: tex diffuseM = 0
+    Variable: tex normalsM = 1
+    Variable: tex masksM = 2
+	// bits textures
+    Variable: tex diffuseB = 3
+    Variable: tex normalsB = 4
+    Variable: tex masksB = 5
+	// damage texture
+	Variable: tex damageT = 6
+	// cubemap texture - must be cubemap!!
+    Variable: tex skybox = 7
+
+	// engine data needed
+    Variable: float time = game_time
+	Variable: vec2 texSize = tex_size 1 	
+    Variable: vec4 ownerColor = node_color
+    Variable: float camDist = node_distance
+    Variable: float nodeScale = node_scale
+	Variable: vec4 damage = obj_quadrant_damage
+    Variable: float[2] lightRadius = light_radius 0 1
+    Variable: vec4 wsRot = node_rotation
+    Variable: float acceleration = obj_acceleration
+    Variable: float velocity = obj_velocity
+
+//Shader: PBRShipSingleMatShield
+Shader: PBRModShipSS
+    Vertex: data/shaders/source/pbr_modship_common_vs.txt
+    Fragment: data/shaders/source/pbr_modship_ss_ps.txt
+	// makes it reload when shader level settings are changed
+    Settings Reload: True
+ 
+	// main textures
+    Variable: tex diffuseM = 0
+    Variable: tex normalsM = 1
+    Variable: tex masksM = 2
+	// damage texture
+	Variable: tex damageT = 3
+	// cubemap texture - must be cubemap!!
+    Variable: tex skybox = 4
+
+	// engine data needed
+    Variable: float time = game_time
+	Variable: vec2 texSize = tex_size 1 	
+    Variable: vec4 ownerColor = node_color
+    Variable: float camDist = node_distance
+    Variable: float nodeScale = node_scale
+	Variable: vec4 damage = obj_quadrant_damage
+    Variable: float[2] lightRadius = light_radius 0 1
+    Variable: vec4 wsRot = node_rotation
+    Variable: float acceleration = obj_acceleration
+    Variable: float velocity = obj_velocity
+
+//Shader: PBRShipSingleMat
+Shader: PBRModShipS
+    Vertex: data/shaders/source/pbr_modship_common_vs.txt
+    Fragment: data/shaders/source/pbr_modship_s_ps.txt
+	// makes it reload when shader level settings are changed
+    Settings Reload: True
+ 
+	// main textures
+    Variable: tex diffuseM = 0
+    Variable: tex normalsM = 1
+    Variable: tex masksM = 2
+	// damage texture
+	Variable: tex damageT = 3
+	// cubemap texture - must be cubemap!!
+    Variable: tex skybox = 4
+
+	// engine data needed
+    Variable: float time = game_time
+	Variable: vec2 texSize = tex_size 1 	
+    Variable: vec4 ownerColor = node_color
+    Variable: float camDist = node_distance
+    Variable: float nodeScale = node_scale
+	Variable: vec4 damage = obj_quadrant_damage
+    Variable: float[2] lightRadius = light_radius 0 1
+    Variable: vec4 wsRot = node_rotation
+    Variable: float acceleration = obj_acceleration
+    Variable: float velocity = obj_velocity

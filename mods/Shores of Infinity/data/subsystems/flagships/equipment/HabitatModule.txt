@@ -1,0 +1,96 @@
+Subsystem: HabitatModule
+	Name: #S_HABITAT_MODULE
+	Description: #S_HABITAT_MODULE_DESC
+	BaseColor: #ffffff
+	TypeColor: #ffffff
+	Elevation: 2
+
+	Tags: Category:Equipment, Habitat, NonContiguous, NoCore
+	Tags: HasInternals
+	Hull: Flagship, Station
+
+	Hex.LaborCost := 0.30 * HexSize + 0.8
+	Hex.BuildCost := 1.5 * HexSize + 2
+	Hex.MaintainCost := 0.03 * HexSize + 2 - (4 * HexSize / ShipSize^0.5)
+	InfluenceBuildCost := ceil(Size / 10)
+
+	Size := HexSize * Hexes
+	Hex.Mass := HexSize
+
+	HabitatPop := floor(Size / 544)
+	PopIncome := HabitatPop * 15
+
+	HabitatCost := 500 * HabitatPop
+	HabitatLabor := 20 * HabitatPop
+	ShipPopStorage := HabitatPop
+
+	Hex.HP := 18 * HexSize
+	Hex.Resistance := 0.2
+
+	Hook: addon_generic_effects::AllowSettlement()
+	Hook: addon_generic_effects::AddStatusStacks(ShipPopulation, 1, 0, -1, False, False, Sum.ShipPopStorage, 100, False, 0)
+	Hook: LimitStatusStacks(ShipPopulation, Sum.ShipPopStorage)
+
+	Requires:
+		Command = ceil(Hexes * 0.6)
+
+	Assert: HabitatPop >= 1
+		Unique: True
+		Message: #ERROR_TOO_SMALL
+
+	Module: Default
+		Hex.BuildCost := Hex.BuildCost + (HabitatCost / Hexes)
+		Hex.LaborCost := Hex.LaborCost + (HabitatLabor / Hexes)
+
+		Sprite: SupportCommand * #edbb99
+
+Subsystem: StarHabitatModule
+	Name: #S_STAR_HABITAT_MODULE
+	Description: #S_STAR_HABITAT_MODULE_DESC
+	BaseColor: #ffffff
+	TypeColor: #ffffff
+	Elevation: 2
+
+	Tags: Category:Equipment, Habitat, NonContiguous, NoCore
+	Tags: HasInternals
+	Hull: Flagship, Station
+
+	HasStarHabitat := 1
+
+	Hex.LaborCost := 0.30 * HexSize + 0.8
+	Hex.BuildCost := 1.0 * HexSize + 2
+	Hex.MaintainCost := 0.02 * HexSize + 2 - (4 * HexSize / ShipSize^0.5)
+
+	Size := HexSize * Hexes
+	Hex.Mass := HexSize
+
+	PopValue := Size / 363
+	HabitatPop := floor(PopValue)
+	PopIncome := HabitatPop * 15
+
+	HabitatCost := 500 * HabitatPop
+	HabitatLabor := 20 * HabitatPop
+	ShipPopStorage := HabitatPop
+
+	Hex.HP := 18 * HexSize
+	Hex.Resistance := 0.2
+
+	Hook: addon_generic_effects::AllowSettlement()
+	Hook: addon_generic_effects::AddStatusStacks(MothershipPopulation, 1, 0, -1, False, False, Sum.ShipPopStorage, 100, False, 0)
+	Hook: LimitStatusStacks(ShipPopulation, Sum.ShipPopStorage)
+
+	Modifier: HabitatPopulationFactor(Factor)
+		PopValue := PopValue * Factor
+
+	Requires:
+		Command = ceil(Hexes * 0.3)
+
+	Assert: HabitatPop >= 1
+		Unique: True
+		Message: #ERROR_TOO_SMALL
+
+	Module: Default
+		Hex.BuildCost := Hex.BuildCost + (HabitatCost / Hexes)
+		Hex.LaborCost := Hex.LaborCost + (HabitatLabor / Hexes)
+
+		Sprite: SupportCommand * #edbb99

@@ -1,0 +1,80 @@
+	Name: DOF-Shipset-Common Library v1.000
+	Compatibility: 200
+	Description: <<
+		Shared resources used in all DOF ( http://steamcommunity.com/sharedfiles/filedetails/?id=485910456 ) shipsets.  Free for use by other shipset modders.  This mod does not make any overt changes to the game on its own, it is a support mod that provides resources for use in building other shipsets.
+
+		[b]Contents[/b]
+
+		Shared Textures:
+		-A collection of solid fill grayscale textures of varying intensities (for specular or gloss effects).
+		-A collection of cloud style grayscale textures of varying intensities for occlusion/irregular style coverage (for specular or gloss effects).
+
+		Custom Shaders:
+		-DOFSupportShip:  Allows color of the diffuse texture to translate into engine light while still using the thruster intensity mechanic.  Light color is shifted to a softer golden color but still overrides the diffuse texture color.
+		-DOFSupportShipLC:  Engine light is the same as DOFSupportShip.  Light color is picked up from diffuse texture pixel color and allows for multi colored lights and more natural lighting for spotlight type effects.
+		-DOFSupportShipLCX:  Works as DOFSupportShipLC but removes ambient lighting from emissive lights.  Provides much brighter and more accurate color for lights than DOFSupportShipLC.  Provided by Dalo Lorn and Jon Micheelsen.
+		-DOFSupportShipLCXB:  A variant of DOFSupportShipLCX with over-boosted light intensity, included for legacy support of certain shipsets created before the boost was removed.
+		-DOFSupportLCXN:  A modified version of DOFSupportShipLCX for converted models with certain normals issues.  Has higher calculation load and may result in some performance loss.  Not recommended for use unless necessary.
+		-DOFSupportLCXNB:  A variant of DOFSupportShipLCXB with over-boosted light intensity.  Included for existing shipsets with legacy light masks.
+		-PBRModShipS:  Single texture PBR mod-friendly shader.
+		-PBRModShipSS:  Single texture PBR mod-friendly shader with support for shield effects.
+		-PBRModShipM:  Limited multi-texture PBR mod-friendly shader.  Supports an additional "bits" texture.  Useful for saving filesize when you have an additional detail texture of lower resolution than the primary texture.
+		-PBRModShipMS:  Limited multi-texture (as above) PBR mod-friendly shader with support for shield effects.
+
+		Dalo's Hex Limit Modifer & Reverter:
+		-Allows customized hex size modifications that can be enabled or disabled but requires additional subsystems be added by modders to use with it.  See Sample.txt in the mod root for examples of how to use it.
+
+		Dalo's Custom Gate Integration Interface:
+		-Enables custom Gate hulls. Mods will have to override GateHull.txt and use instructions provided in GateHull to fully activate the system.
+
+		[b]Mod-Friendly PBR Shader Guide[/b]
+		http://steamcommunity.com/sharedfiles/filedetails/?id=754714490
+		(Duplicated in PBRModShipShader-Guide.txt in the mod's root directory)
+
+		[b]Usage for shipset builders[/b]
+
+		-Textures may be reference via data/shipsets/DOFCommon/texturename.png
+		-Shaders may be referenced simply by name.
+		-This mod should be subscribed to or present in the user's mod list.  I recommend marking it as a "required item" of your shipset mod download to ensure it works.
+		-"Derives From: DOF-Shipset-Common Library v1.000" can be placed in your shipset modinfo.txt to ensure that the library is loaded even if the mod is not enabled.  Replace v1.000 with the current version number of this mod.
+
+		[b]Special Thanks[/b]
+		-Dalo Lorn for his help in creating the original shaders.
+		-Jon Micheelsen for his expertise on refining the shaders and his Mod-Friendly PBR Shader collection.
+
+	[b]Change Log:[/b]
+
+	[b]July 16, 2017[/b]
+	-PBR shader improvements courtesy of Jon M.  Much improved reflections and subtle but significant improvement to overall visual quality.  Also appears to fix some texture noise issues that could occur with some textures.
+
+	[b]September 24, 2016[/b]
+	-Correction for light calculation in the PBR shaders.
+
+	[b]September 6, 2016[/b]
+	-Corrections to errors in the PBR shaders related to TeamColor and Damage skin.
+
+	[b]August 30, 2016[/b]
+	-Updated local copy of PBRModShipShader-Guide.txt.
+
+	[b]August 29, 2016[/b]
+	-Added Jon Micheelsen's prelimary version of the Mod-Friendly PRB Shaders.
+
+	[b]May 12, 2016[/b]
+	-Added Satellite support to Hex Limit Modifier & Reverter system.
+
+	[b]May 9, 2016[/b]
+	-Added DOFSupportShipLCXN and DOFSupportShipLCXNB shaders.
+	-Gate Hull is now set to DefaultUnlock.
+
+	[b]April 26, 2016[/b]
+	-Basic patch v2.0.0 compatibility update.
+
+	[b]December 4, 2016[/b]
+	-Modified DOF and DOFLC SupportShip variants which regenerate the Z (blue) data of normal maps, particularly important when dealing with textures converted from DXT5_NM format, provided by Jon Micheelsen & Dalo Lorn
+	-DOFSupportShipLCX added, a variant of the DOFLC SupportShip shader modified to remove ambient lighting from emissive lights.  Final code provided by Jon Micheelsen
+	-DOFSuportShipLCXB included to maintain compatibility with the next version of 'The Firstborn' by Dalo Lorn.
+	-Hex Limit Modifier and Reverter (by Dalo Lorn) functionality is now included, along with samples of how to enable it provided.
+	-Custom Gate Integration Interface (by Dalo Lorn) included to enable custom Gate hulls.
+
+	>>
+//	Base Mod: True

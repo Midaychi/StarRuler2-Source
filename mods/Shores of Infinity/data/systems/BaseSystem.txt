@@ -1,0 +1,65 @@
+System: BaseSystem
+	//Caution: this is a load order
+	Inherit: BaseInnerRim
+	Inherit: BaseGasGiants
+	Inherit: BaseIceGiants
+	Inherit: BaseOuterRim
+	Inherit: BaseRemnants
+	Inherit: BaseAsteroidBelt
+	Inherit: BaseAsteroids
+	Inherit: BaseAnomalies
+	Inherit: BaseArtifacts
+
+System: OuterSystem
+	//Caution: this is a load order
+	Inherit: BaseInnerRim
+	Inherit: BaseGasGiants
+	Inherit: BaseIceGiants
+	Inherit: BaseOuterRim
+	Inherit: BaseRemnants
+	Inherit: OuterAsteroidBelt
+	Inherit: BaseAsteroids
+	Inherit: BaseAnomalies
+	Inherit: BaseArtifacts
+
+System: BaseGasGiants
+	RepeatChance(Chance = 0.7, Repeat Modifier = 0.6)
+		MakePlanet(Resource = Weighted, Secondary Resource = Ruled, Classification = Gas, Giant = True, Force Native biome = True, Add Status = GasGiant)
+
+System: BaseIceGiants
+	RepeatChance(Chance = 0.5, Repeat Modifier = 0.3)
+		MakePlanet(Resource = Weighted, Secondary Resource = Ruled, Classification = Icy, Giant = True, Force Native Biome = True, Add Status = IceGiant)
+
+System: BaseInnerRim
+
+System: BaseOuterRim
+	ExpandSystem(1000)
+	ExpandSystemMinimum()
+
+System: BaseAsteroidBelt
+	RepeatChance(Chance = $ASTEROID_BELT_OCCURANCE, Repeat Modifier = 0.99999)
+		MakeAsteroidBelt()
+
+System: OuterAsteroidBelt
+	RepeatChance(Chance = $ASTEROID_BELT_OCCURANCE, Repeat Modifier = 0.99999)
+		MakeAsteroidBelt(Radius = Outer)
+
+System: BaseAsteroids
+	RepeatChance(Chance = $ASTEROID_OCCURANCE, Repeat Modifier = 0.999999)
+		MakeAsteroid(Cargo = Ore)
+	RepeatChance(Chance = $RESOURCE_ASTEROID_OCCURANCE, Repeat Modifier = 0.7)
+		MakeAsteroid(Resource = Distributed)
+
+System: BaseAnomalies
+	RepeatChance(Chance = $ANOMALY_OCCURANCE, Repeat Modifier = 0.5)
+		MakeAnomaly()
+
+System: BaseRemnants
+	RepeatQuality(Chance = $REMNANT_OCCURANCE, Repeat Modifier = 0.5, Quality Step = 200)
+		MakeCreepCamp()
+
+System: BaseArtifacts
+	RepeatQuality(Chance = $ARTIFACT_FREQUENCY, Repeat Modifier = 0.25, Quality Step = 200)
+		MakeArtifact()
+	RepeatChance(Chance = 0.4, Repeat Modifier = 0.8)
+		MakeArtifact(Type = Comet)

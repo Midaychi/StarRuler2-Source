@@ -1,0 +1,517 @@
+#version 120
+// shader level settings
+const bool advancedProcedurals = 	#{{level:extreme}};
+const bool parallax = 				#{{level:extreme}};
+const bool scattering =				#{{level:extreme}};
+const bool specAntiAlias = 			#{{level:high}};
+const bool pbrLight = 				#{{level:high}};
+const bool simpleProcedurals = 		#{{level:high}};
+const bool advancedAmbience = 		#{{level:high}};
+const bool normalMapping = 			#{{level:medium}};
+const bool simpleAmbience = 		#{{level:medium}};
+const bool selfIllumination = 		#{{level:medium}};
+
+const int nLightCount = 2;
+
+// math constants
+const float pi = 3.14159265358;
+const float tau = 6.28318530716;
+// constants for emissive lights and starlight intensity
+const float emissiveIntensity = 5.0;
+const float ambientIntensity = 1.0;
+const float lightIntensity = 5.0;
+// constant for specular anti-aliasing
+const float specAAsmooth = 1.0;
+const float specAAintensity = 0.5; // 0 is off 1 breaks it!
+// how rough is the main plates, the one's tinted by complimentary owner color.
+const float playerRoughness = 0.5;
+// how rough is the rest
+const float baseRoughness = 0.35;
+// max mip used for ambient light. Each cubemap side is 1Kx1K, so there is technically mips 0-10. At 6 the lowest mip used is 16x16.
+const int maxMip = 9;
+
+// parallax scale, bias and steps
+const vec2 scaleBias = vec2(0.008, 0.004); // vertmask flattens parallax on engines to avoid mirror artefacts
+const float minP = 4; // min parallax steps
+const float maxP = 16; // max parallax steps
+
+// shield color hardcoded to match the ship shield effect
+const vec3 shieldColor = vec3(0.3, 0.9,1.0);
+
+// for procedural noise
+const vec4 hashSeed = vec4(.16532,.17369,.15787, .14987);
+
+uniform sampler2D diffuseM, normalsM, masksM/*, diffuseB, normalsB, masksB*/, damageT;
+uniform samplerCube skybox;
+uniform vec2 texSize;
+uniform vec4 ownerColor;
+uniform float camDist;
+uniform float time, nodeScale;
+uniform float lightRadius[nLightCount];
+uniform float acceleration;
+uniform float velocity;
+//damage direction top, right, bottom, left
+uniform vec4 damage;
+
+varying vec3 light[nLightCount];
+varying vec3 vertMasksPrimary, vertMasksSecondary;
+varying vec3 normal;
+varying vec3 npos, origo;
+varying vec2 uv;
+varying vec4 pos;
+varying vec2 vertLightMask;
+
+
+vec3 toLinear(vec3 x) {
+	return pow(x, vec3(2.2));
+}
+
+vec3 toGamma(vec3 x) {
+	return pow(x, vec3(0.45));
+}
+
+// pow alternatives
+vec3 square(vec3 x) {
+	return x*x;
+}
+
+float square(float x) {
+	return x*x;
+}
+
+vec2 square(vec2 x) {
+	return x*x;
+}
+
+float pow5(float x) {
+
+	float y = x*x;
+	return y*y*x;
+}
+
+float pow32(float x) {
+
+	x = x*x;
+	x = x*x;
+	x = x*x;
+	x = x*x;
+	x = x*x;
+	return x;
+}
+
+// unpacks two-channel in one channel textures
+vec2 unPack(float single) {
+
+	vec2 split = vec2(0.0);
+	split.x = max(0.0, min(0.5, single) -0.25) * 2.0;
+	split.y = 1.0 - ((single - split.x) * 4.0);
+	split.x *= 2.0;
+	
+	return split;
+}
+
+// speculer term part 1
+float D_GGX(float HdotN, float Roughness)
+{
+    float m = Roughness * Roughness;
+    float m2 = m * m;
+    float denominator = HdotN * HdotN * (m2 - 1.0) + 1.0;
+    float D = m2 /( pi * denominator * denominator);
+    return D;
+}
+
+// specular term part 2
+float V_SchlickforGGX(float Roughness, float NdotV, float NdotL)
+{
+    float k = Roughness * Roughness * 0.5f;
+    float G1V = NdotV * (1.0 - k) + k;
+    float G1L = NdotL * (1.0 - k) + k;
+    return 0.25f / (G1V * G1L);
+}
+
+// specular term part 2 - for self illumination
+vec3 V_SchlickforGGX(float Roughness, float NdotV, vec3 NdotL)
+{
+    float k = Roughness * Roughness * 0.5f;
+    float G1V = NdotV * (1.0 - k) + k;
+    vec3 G1L = NdotL * (1.0 - k) + k;
+    return 0.25f / (G1V * G1L);
+}
+
+// fresnel for specular term
+vec3 Fresnel(vec3 substance, float VdotH)
+{
+	return substance + substance * pow(1.0 - VdotH, 5.0);
+}
+
+// fresnel for ambient light
+vec3 Fresnel2(vec3 substance, float dotProduct, float roughness)
+{
+	return substance + (1.0 - substance) * pow((1.0 - dotProduct), 5.0) / (6.0 - 5.0 * roughness);
+}
+
+// diffuse term heavily approximated to avoid a ton of trigonometry
+float OrenNayerforDiffuseOnly(float roughness, float NdotL, float NdotV)
+{
+	float O = 0.62 - pow(1.0 - NdotL * clamp(1.0 - NdotV / 2.0, 0.0, 1.0), pi) * 0.62;
+	O = mix(O, NdotL, roughness);
+	return O;
+}
+// fail-safe get normal map z component
+float deriveZ(vec2 n) {	
+
+	float z = pow(abs(1.0 - n.x * n.x - n.y * n.y), 0.5);
+	
+	return z;
+}
+
+// angle corrected normal blending
+vec3 normalMix(vec3 n1, vec3 n2)
+{
+    vec3 r;
+    r.x = dot(n1.zxx,  n2.xyz);
+    r.y = dot(n1.yzy,  n2.xyz);
+    r.z = dot(vec3(n1.xy, -1.0 * n1.z), -n2.xyz);
+    return normalize(r);
+}
+
+// engine color sub function
+float mixRange(float x, float low, float hi) {
+	return clamp((x - low) / (hi - low), 0.0, 1.0);
+}
+// engine color
+vec3 blackBody(float temp) {
+	vec3 c;
+	c.r = mix(1.0, 0.6234, mixRange(temp, 6400.0, 29800.0));
+	c.b = mix(0.0, 1.0, mixRange(temp, 2800.0, 7600.0));
+	c.g = mix(mix(0.22, 0.976, mixRange(temp, 1000.0, 6600.0)), mix(0.976, 0.65, mixRange(temp, 6600.0, 29800.0)), floor(temp/29800.0 + 0.22148));
+	return c;
+}
+
+// shield effect
+float shieldEffect(vec2 uv, vec3 t)
+{
+	vec2 uvRad = uv + vec2(0.5, -0.5);
+	float falloff = dot(uvRad, uvRad) * 3.0;
+	if (simpleProcedurals){
+		//source intensity levels
+		vec2 pulse = 2.0 * uv + 2.0;
+		pulse.x *= 2.0;
+		pulse *= 4.0;
+	
+		//frequency of radial ring ripples
+		float radialRipples = sin(pulse.x + sin(t.x + pulse.x * falloff)) * sin(pulse.y + sin(t.x * 0.5));
+		
+		float shield = 0.0;	
+		shield = radialRipples;
+		pulse *= 0.5;
+		pulse = abs(pulse);
+		pulse *= falloff;
+		pulse.x += sin(pulse.y * sin(pulse.x));
+	
+		//frequency of ring ripples
+		float ripples = sin(pulse.x + t.x);
+		
+		shield += ripples;
+		shield *= ripples * radialRipples;
+		shield = max(0.0,min(1.0,shield)) * 0.33;
+		shield += falloff * 0.33;
+		
+		//end intensity levels
+		shield *= 4.0 * falloff;
+		return shield;
+	}
+	else{
+		return falloff;
+	}	
+}
+
+// random noise functions ahead
+vec3 hash33(vec3 p3)
+{
+	p3 = fract(p3 * hashSeed.xyz);
+    p3 += dot(p3, p3.yxz + 19.19);
+    return -1.0 + 2.0 * fract(vec3((p3.x + p3.y) * p3.z, (p3.x + p3.z) * p3.y, (p3.y + p3.z) * p3.x));
+}
+
+float simplex_noise(vec3 p)
+{
+    const float K1 = 0.333333333;
+    const float K2 = 0.166666667;
+    
+    vec3 i = floor(p + (p.x + p.y + p.z) * K1);
+    vec3 d0 = p - (i - (i.x + i.y + i.z) * K2);
+    
+    vec3 e = step(vec3(0.0), d0 - d0.yzx);
+	vec3 i1 = e * (1.0 - e.zxy);
+	vec3 i2 = 1.0 - e.zxy * (1.0 - e);
+    
+    vec3 d1 = d0 - (i1 - 1.0 * K2);
+    vec3 d2 = d0 - (i2 - 2.0 * K2);
+    vec3 d3 = d0 - (1.0 - 3.0 * K2);
+    
+    vec4 h = max(0.6 - vec4(dot(d0, d0), dot(d1, d1), dot(d2, d2), dot(d3, d3)), 0.0);
+    vec4 n = h * h * h * h * vec4(dot(d0, hash33(i)), dot(d1, hash33(i + i1)), dot(d2, hash33(i + i2)), dot(d3, hash33(i + 1.0)));
+    
+    return dot(vec4(31.316), n);
+}
+
+vec3 dp1Calc(vec3 p)
+{
+	return dFdx(p);
+}
+
+vec3 dp2Calc(vec3 p)
+{
+	return dFdy(p);
+}
+
+vec2 duv1Calc(vec2 uv) {
+	return dFdx(uv);
+}
+
+vec2 duv2Calc(vec2 uv) {
+	return dFdy(uv);
+}
+
+float smoothCurve(float x){
+	return x * x * (3.0 - 2.0 * x);
+}
+/// specular anti-aliasing, note n is world space normal mapped(and parallax displaced) normals
+float specAA(vec3 n, float roughness){
+
+	vec3 ddxN = dFdx(n);
+	vec3 ddyN = dFdy(n);
+	float cavity = max( dot( ddxN, ddxN ), dot( ddyN, ddyN ) );
+
+	float aa = -0.0909 - 0.0909 * log2(specAAsmooth * cavity);
+	return max(roughness, (1.0 - aa) * specAAintensity);
+}
+
+void main() {
+	// scale battledamage to model size, relative to texture
+	float scale = pow(nodeScale, 0.4);
+	vec3 t = time * vec3(5.0, 7.0, 3.0);
+
+	vec2 uvSamp = uv;//vec2(uv.x, uv.y * 2.0);
+	vec2 damageScale = vec2(texSize / 2048) * scale;
+	
+	//Damage setup
+	float damageNoise = clamp(simplex_noise(origo * scale * 4.0) * 0.75 + 0.25, 0.0, 1.0);
+
+	vec4 sampA;
+	vec4 sampB;
+	vec4 sampC;
+	
+	bool isShield = uv.x < 0.0 ? true: false;
+//	bool isBits = uv.y < 0.5 ? true: false;
+	float shield = 0.0;
+	
+	if(isShield){
+		sampA = vec4(0.0);
+		sampB = vec4(0.5, 0.5, 1.0, 1.0);		
+		sampC = vec4(0.0);
+		shield += shieldEffect(uv, t);
+
+	}
+/*	else if(isBits){
+		sampA = texture2D(diffuseM, uvSamp);
+		sampB = texture2D(normalsM, uvSamp);		
+		sampC = texture2D(masksM, uvSamp);
+	}*/
+	else{
+		sampA = texture2D(diffuseM, uvSamp);
+		sampB = texture2D(normalsM, uvSamp);		
+		sampC = texture2D(masksM, uvSamp);
+	}
+	
+	vec4 heightDamage = texture2D(damageT, uvSamp * damageScale, 0.0);
+	
+	vec4 damageMask = clamp((vec4(-origo.z, origo.x, origo.z, -origo.x) * 8.0 + vec4(0.5)), vec4(0.0), vec4(1.0)) * damage;
+	damageMask.g = clamp((damageMask.r + damageMask.g + damageMask.b + damageMask.a) * damageNoise, 0.0, 1.0);
+	damageMask.g = mix(1.0,  (1.0 - sampC.a) * heightDamage.b, damageMask.g);
+	damageMask.g = smoothCurve(mix(pow(1.0 - heightDamage.a, 8.0), 1.0, damageMask.g));
+	damageMask.b = 1.0 - damageMask.g;
+	
+	vec3 n = normalize(normal);
+	vec3 nG = n;
+	vec3 v = normalize(npos);
+
+	// scale engine animation relative to mo
+	float engineEffect;
+	// Engine setup
+	float thrust = clamp((velocity * acceleration * 0.025), 0.0, 1.0);
+	vec3 engineColor = toLinear(pow(blackBody(1000.0 + 22000.0 * square(thrust)), vec3(1.0 + (1.0 - sampC.b)) * 2.0)) * (thrust * 0.8 + 0.2);
+	
+	// engines are added
+	if (advancedProcedurals)
+		engineEffect = (max(0.0, square(abs(simplex_noise(vec3(origo.x * 0.125 * nodeScale + t.z, origo.yz * 1.0 * nodeScale)) * 0.66 + simplex_noise(vec3(origo.x * 0.25 * nodeScale + t.z, origo.yz * 2.0 * nodeScale)) * 0.33))) * min(velocity, thrust + 0.1) + sampC.b * 0.5 * thrust) * sampC.b;	
+	else if (simpleProcedurals){
+		engineEffect = (max(0.0, square(abs(simplex_noise(vec3(origo.x * 0.25 * nodeScale + t.z, origo.yz * 1.0 * nodeScale))))) * min(velocity, thrust + 0.1) + sampC.b * 0.5 * thrust) * sampC.b;
+	}
+	else{
+		engineEffect = sampC.b;
+	}
+
+	vec3 emissive = toLinear(sampA.rgb * sampC.r * damageMask.g + engineColor * sampC.b);
+	float specular = 0.5 + sampB.a * damageMask.g; // only used as a hard multiplier if PBR
+	float metalness = sampA.a * (1.0 - sampC.g) * damageMask.g;
+
+	vec3 albedo = mix(sampA.rgb, ownerColor.rgb, sampC.g * pow(damageMask.g, 4.0));// * heightDamage.b);
+	albedo = toLinear(mix(albedo * vec3(0.333, 0.318, 0.286) * (heightDamage.b * 0.75 + 0.25), albedo, damageMask.g));
+
+	vec3 substance = (0.04 - 0.04 * metalness) + albedo * metalness;
+	albedo = clamp(albedo - substance, vec3(0.01), vec3(1.0));
+	float orgRoughness = min(1.0, sampB.b + (1.0 - damageMask.g));
+	float ao = sampC.a;//pow(sampC.a * 0.95, 1.0 + damageMask.b * 8.0);
+	
+	//Zoom-out highlight setup
+	float highlight = smoothstep(0.0, 500.0, max(0.0001, camDist - 1.0) / scale) * 0.2;
+		
+	
+	if (normalMapping){
+		
+		// tbn screenspace cotangent derivative
+		vec3 dp1 = dp1Calc(-v);
+		vec3 dp2 = dp2Calc(-v);
+		vec2 duv1 = duv1Calc(uvSamp);
+		vec2 duv2 = duv2Calc(uvSamp);
+		
+		// solve the linear system
+		vec3 dp2perp = cross(dp2, n);
+		vec3 dp1perp = cross(n, dp1);
+		
+		vec3 tangent = dp2perp * duv1.x + dp1perp * duv2.x;
+		vec3 binormal = dp2perp * duv1.y + dp1perp * duv2.y;
+	
+		// construct a scale-invariant frame 
+		float invmax = pow(max(dot(tangent, tangent), dot(binormal, binormal)), -0.5);
+		mat3 TBN = mat3(tangent * invmax, binormal * invmax, n);
+
+		// Normal setup and z calculate
+		n.xy = (mix(sampB.xy, heightDamage.xy, damageMask.b) * 2.0 - 1.0);
+		n.z = deriveZ(n.xy);
+
+		n = normalize(TBN * n);		
+
+	}
+	float NdotV = abs(dot(n, v));
+
+	
+	if(specAntiAlias){
+		orgRoughness = specAA(n, orgRoughness);
+	}
+	
+	// reflection vector
+	vec3 r = normalize(reflect(-v, n));
+	
+	// actual shading starts here
+	vec3 color = vec3(0.0);
+
+	vec3 ambientFresnel = Fresnel2(substance, NdotV ,orgRoughness);
+
+	if (advancedAmbience){
+	// changed from mipping to a mixing loop to get rid of the reflection pixelation
+		float rMix = pow(1.0 - orgRoughness, 4.0) * maxMip;
+		int rSteps = int(ceil(rMix));
+		color = textureCubeLod(skybox, r, maxMip).rgb;
+		
+		// causes random crashes if run with rSteps
+		//for (int i = 0; i < rSteps; i++) {
+		//	color = mix(color, textureCubeLod(skybox, r, rSteps - i).rgb, clamp(rMix - i, 0.0, 1.0));	
+			
+		//}
+		color = textureCubeLod(skybox, r, orgRoughness * maxMip).rgb;
+
+		color = square((color + 0.024) * ambientFresnel);
+
+		// ambient light
+		color += square(textureCubeLod(skybox, n.xyz, maxMip).rgb + 0.024) * albedo * (1.0 - ambientFresnel);
+	}
+	else if (simpleAmbience){
+		// Ambient reflections with fix mip and n instead of refect
+		color += square(textureCubeLod(skybox, r, maxMip * 0.25).rgb * ambientFresnel);
+	
+		// Ambient light - average color of skybox squared
+		color += vec3(0.006724, 0.014884, 0.067081) * albedo * (1.0 - ambientFresnel);
+	}
+	else{
+		// Ambient 
+		color += vec3(0.006724, 0.014884, 0.067081) * (ambientFresnel + albedo * (1.0 - ambientFresnel));
+	}
+	
+	color *= ambientIntensity;
+	vec3 lights = vec3(emissive);
+	float roughnessRemapped = (1.0 + orgRoughness) * 0.5;
+
+
+	if (pbrLight){		
+		for (int i = 0; i < nLightCount; i++) {
+			float distance = length(gl_LightSource[i].position.xyz - pos.xyz); // EYE SPACE, I'm sorry:o(
+			// rest is world space
+
+			vec3 L = normalize(light[i] / distance);
+			float NdotL = max(0.0, dot(n,L));
+			
+			float sqrLightRadius = square(lightRadius[i]);
+			float illuminance = lightIntensity * pi * (sqrLightRadius / (max(sqrLightRadius, dot(L,L))));
+			
+			// note the square to kill hard spec in deep space!
+			float attenuation = square(1.0 / (1.0 + (gl_LightSource[i].constantAttenuation
+			+ gl_LightSource[i].linearAttenuation * distance
+			+ gl_LightSource[i].quadraticAttenuation * square(distance)))) * illuminance * NdotL * clamp(dot(nG, L) + 0.25, 0.0, 1.0);
+			
+			if (attenuation >0.0){
+				vec3 VplusL = L + v;
+				vec3 halfVec = normalize(VplusL);
+				float HdotN = max(0.0, dot(halfVec,n));
+				float HdotV = max(0.0, dot(halfVec,v));
+				vec3 F = Fresnel(substance, HdotV);
+				float D = max(0.0, D_GGX(HdotN, orgRoughness));
+				float V = max(0.0, V_SchlickforGGX(roughnessRemapped, NdotV, NdotL));
+				float O = OrenNayerforDiffuseOnly(orgRoughness, NdotL, NdotV);
+				
+				color += ((D * V * F) + (1.0 - F) * O * albedo) * gl_LightSource[i].diffuse.rgb * attenuation;
+			}
+		}
+		// hard cavity multiplier
+		color *= (specular);
+	}
+	// this light model is pretty loose in terms of what it does, design focus to match 
+	// the pbr in terms of visibility and overall feel for a fraction of the price
+	else{
+		for (int i = 0; i < nLightCount; i++) {
+			float distance = length(gl_LightSource[i].position.xyz - pos.xyz); // EYE SPACE, I'm sorry:o(
+			// rest is world space
+
+			vec3 L = normalize(light[i] / distance);
+			float NdotL = max(0.0, dot(n,L));
+			
+			float sqrLightRadius = square(lightRadius[i]);
+			float illuminance = lightIntensity * pi * (sqrLightRadius / (max(sqrLightRadius, dot(L,L))));
+			
+			// note the square to kill hard spec in deep space!
+			float attenuation = square(1.0 / (1.0 + (gl_LightSource[i].constantAttenuation
+			+ gl_LightSource[i].linearAttenuation * distance
+			+ gl_LightSource[i].quadraticAttenuation * square(distance)))) * illuminance * NdotL * clamp(dot(nG, L) + 0.25, 0.0, 1.0);
+			
+			vec3 VplusL = L + v; 
+			vec3 halfVec = normalize(VplusL);
+			float HdotN = max(0.0, dot(halfVec, n));
+
+			// albedo * (maskSamp.b * 0.5) to sorta hack albedo into a classical diffuse texture
+			color += (albedo * (specular * 0.5) + pow(HdotN, pow5(1.0 - orgRoughness) * 128.0 * (specular + 1.0)) * substance) * gl_LightSource[i].diffuse.rgb * attenuation;
+		}
+	}
+
+	color *= square(ao);
+
+	
+	// shading is revomed from the shields and lights are added	
+	color += mix(shieldColor, vec3(1.0), shield * 0.25) * float(isShield);
+	color += lights * emissiveIntensity;
+	
+
+	gl_FragColor.rgb = toGamma(clamp(color, vec3(0.0), vec3(1.0))) + highlight;
+	gl_FragColor.a = shield + (1.0 - float(isShield));
+}

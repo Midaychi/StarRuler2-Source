@@ -1,0 +1,101 @@
+Shader: DOFSupportShip
+	Vertex: data/shaders/source/support_ship_vs.txt
+	Fragment: data/shaders/source/DOF_support_ship_ps.txt
+
+	Variable: tex diffuseRGB = 0
+	Variable: tex normalMap = 1
+	Variable: tex specularMap = 2
+	Variable: tex glossMap = 3
+	Variable: tex skybox = 4
+	Variable: tex masks = 5
+	Variable: vec4 ownerColor = node_color
+	Variable: vec3 glowColor = <1.0,0.7,0.2>
+	Variable: float thrust = 1.0
+	Variable: mat3 invView = inverse_view
+	Variable: float camDist = node_distance
+	Variable: float nodeScale = node_scale
+
+Shader: DOFSupportShipLC
+	Vertex: data/shaders/source/support_ship_vs.txt
+	Fragment: data/shaders/source/DOF-LC_support_ship_ps.txt
+
+	Variable: tex diffuseRGB = 0
+	Variable: tex normalMap = 1
+	Variable: tex specularMap = 2
+	Variable: tex glossMap = 3
+	Variable: tex skybox = 4
+	Variable: tex masks = 5
+	Variable: vec4 ownerColor = node_color
+//	Variable: vec3 glowColor = <1.0,0.9,0.1>
+	Variable: float thrust = 1.0
+	Variable: mat3 invView = inverse_view
+	Variable: float camDist = node_distance
+	Variable: float nodeScale = node_scale
+
+Shader: DOFSupportShipLCX
+	Vertex: data/shaders/source/support_ship_vs.txt
+	Fragment: data/shaders/source/DOF-LCX_support_ship_ps.txt
+
+	Variable: tex diffuseRGB = 0
+	Variable: tex normalMap = 1
+	Variable: tex specularMap = 2
+	Variable: tex glossMap = 3
+	Variable: tex skybox = 4
+	Variable: tex masks = 5
+	Variable: vec4 ownerColor = node_color
+//	Variable: vec3 glowColor = <1.0,0.9,0.1>
+	Variable: float thrust = 1.0
+	Variable: mat3 invView = inverse_view
+	Variable: float camDist = node_distance
+	Variable: float nodeScale = node_scale
+
+Shader: DOFSupportShipLCXB
+	Vertex: data/shaders/source/support_ship_vs.txt
+	Fragment: data/shaders/source/DOF-LCXB_support_ship_ps.txt
+
+	Variable: tex diffuseRGB = 0
+	Variable: tex normalMap = 1
+	Variable: tex specularMap = 2
+	Variable: tex glossMap = 3
+	Variable: tex skybox = 4
+	Variable: tex masks = 5
+	Variable: vec4 ownerColor = node_color
+//	Variable: vec3 glowColor = <1.0,0.9,0.1>
+	Variable: float thrust = 1.0
+	Variable: mat3 invView = inverse_view
+	Variable: float camDist = node_distance
+	Variable: float nodeScale = node_scale
+
+Shader: DOFSupportShipLCXN
+	Vertex: data/shaders/source/support_ship_vs.txt
+	Fragment: data/shaders/source/DOF-LCXN_support_ship_ps.txt
+
+	Variable: tex diffuseRGB = 0
+	Variable: tex normalMap = 1
+	Variable: tex specularMap = 2
+	Variable: tex glossMap = 3
+	Variable: tex skybox = 4
+	Variable: tex masks = 5
+	Variable: vec4 ownerColor = node_color
+//	Variable: vec3 glowColor = <1.0,0.9,0.1>
+	Variable: float thrust = 1.0
+	Variable: mat3 invView = inverse_view
+	Variable: float camDist = node_distance
+	Variable: float nodeScale = node_scale
+
+Shader: DOFSupportShipLCXNB
+	Vertex: data/shaders/source/support_ship_vs.txt
+	Fragment: data/shaders/source/DOF-LCXNB_support_ship_ps.txt
+
+	Variable: tex diffuseRGB = 0
+	Variable: tex normalMap = 1
+	Variable: tex specularMap = 2
+	Variable: tex glossMap = 3
+	Variable: tex skybox = 4
+	Variable: tex masks = 5
+	Variable: vec4 ownerColor = node_color
+//	Variable: vec3 glowColor = <1.0,0.9,0.1>
+	Variable: float thrust = 1.0
+	Variable: mat3 invView = inverse_view
+	Variable: float camDist = node_distance
+	Variable: float nodeScale = node_scale

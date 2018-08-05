@@ -1,0 +1,33 @@
+Subsystem: MachineShop
+	Name: #S_MACHINE_SHOP
+	Description: #S_MACHINE_SHOP_DESC
+	BaseColor: #b3b6b7
+	TypeColor: #b3b6b7
+	Elevation: 1
+
+	Tags: DefaultUnlock, Category:Equipment, BaseCost, HasInternals, NonContiguous, NoCore
+	Hull: Flagship, Station
+
+	HasMachineShop := 1
+
+	Size := HexSize * Hexes
+
+	LaborIncome := Size / 10
+
+	LaborStorage := floor(Size)
+
+	Hook: AllowConstruction(True, True, True, True)
+	Hook: AddLaborIncome(LaborIncome)
+	Hook: AddLaborStorage(LaborStorage)
+	Hook: AddPermanentStatus(MachineShop)
+
+	Assert: LaborStorage >= 1
+		Unique: True
+		Message: #ERROR_TOO_SMALL
+
+	Module: Default
+		Sprite: SupplyStorage * #b3b6b7
+
+		Hex.BuildCost := Hex.BuildCost + LaborIncome * 60
+		Hex.LaborCost := Hex.BuildCost + LaborIncome * 3
+		Hex.MaintainCost := Hex.MaintainCost + LaborIncome * 25

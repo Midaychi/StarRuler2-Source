@@ -1,0 +1,7 @@
+Status: GasGiant
+	Name: #GAS_GIANT
+	Description: #GAS_GIANT_DESC
+	Icon: PlanetType::13
+	Color: #00ff00
+	Collapses: True
+	Visible To: Global

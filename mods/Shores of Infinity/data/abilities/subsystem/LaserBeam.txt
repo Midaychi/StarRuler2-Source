@@ -1,0 +1,16 @@
+Ability: LaserBeam
+  Name: #ABL_LASERBEAM
+  Description: #ABL_LASERBEAM_DESC
+  Icon: Laser
+
+  Target: ship = Object
+  Range: 700000
+  Scale Range: True
+  TargetFilterOwned(ship)
+  TargetFilterFlagship(ship, Allow Stations = False)
+  TargetFilterDesignTag(ship, Lightsail)
+  addon_target_filters::TargetFilterNotStatusCount(ship, LaserSail, 2)
+
+  IsToggleTarget(ship, Check Range = True, Range Margin = 1.0, Channels = False)
+  PersistentBeamEffect(ship, #ff0400, Tractor, Width = 0.3)
+  ABEM_hooks::ApplyTargetOwnedVariableStatusEffect(ship, LaserSail, Sys.LaserDrivePower:1.5)

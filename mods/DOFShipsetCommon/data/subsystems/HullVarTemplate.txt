@@ -1,0 +1,32 @@
+Template: var/SupportHexes, var/FlagshipHexes, var/StationHexes, var/SatelliteHexes
+	Modifier: HexLimitToolFactor(factor)
+		SupportHexes := SupportHexes * factor
+		FlagshipHexes := FlagshipHexes * factor
+		StationHexes := StationHexes * factor
+		SatelliteHexes := SatelliteHexes * factor
+		
+Subsystem: HexLimitModifier
+	Name: Hex Limit Modifier
+	Description: Applies the hull's hex limit customization, if any exists.
+	
+	Tags: Applied:HexLimits, Category:Hulls, NoCore
+	Tags: DefaultUnlock
+	Hull: Flagship, Station, Support
+	EvaluationOrder: -2000
+	BaseColor: #a702cc
+	
+	Module: Default
+		Sprite: DesignationIcons::16
+		DrawMode: 3
+		
+	//AddShipModifier: HexLimitToolFactor(0)
+	
+	FlagshipHexes := 0
+	SupportHexes := 0
+	StationHexes := 0
+	SatelliteHexes := 0
+
+	AddShipModifier: tag/SupportHull::AddHexLimit(Sum.SupportHexes)
+	AddShipModifier: tag/FlagshipHull::AddHexLimit(Sum.FlagshipHexes)
+	AddShipModifier: tag/StationHull::AddHexLimit(Sum.StationHexes)
+	AddShipModifier: tag/SatelliteHull::AddHexLimit(Sum.SatelliteHexes)

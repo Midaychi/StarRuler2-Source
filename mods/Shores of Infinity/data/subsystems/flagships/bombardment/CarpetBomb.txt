@@ -1,0 +1,53 @@
+Subsystem: CarpetBomb
+	Name: Carpet Bomb
+	Description: A heavy, multiple warhead weapon designed to devastate a planet's surface and population.
+	BaseColor: #ff8931
+	TypeColor: #ff8931
+	Elevation: 2
+
+	Tags: Category:Weapons, Rotatable
+	Tags: ExteriorCore, Weapon, DefaultUnlock, Bombardment
+	Hull: Flagship
+
+	Size := HexSize * Hexes
+
+	Range :=  150
+	BombardStacks := max(floor(Size * 0.015), 1)
+	BombardDuration := Size * 3.0 / BombardStacks
+	Reload := 45 * min(1.0 + Size/1024, 2.5)
+	BombardCost := Size * 200
+
+	Hex.HP := 3 * HexSize
+	Hex.Mass := HexSize
+	Hex.Resistance := 0.2
+	Hex.LaborCost := HexSize
+	Hex.BuildCost := 6 * HexSize
+	Hex.MaintainCost := 2 * HexSize
+
+	Requires:
+		Command = 1
+
+	Modifier: RangeFactor(factor)
+		Range := Range * factor
+
+	Modifier: DamageFactor(factor)
+		BombardDuration := BombardDuration * factor
+
+	Module: Default
+
+	Module: Core
+		Hex.BuildCost := 3 * Hex.BuildCost
+		Hex.MaintainCost := 3 * Hex.MaintainCost
+		Hex.LaborCost := 3 * Hex.LaborCost
+		Hex.HP := Hex.HP * 4.0
+
+		Sprite: MissileLauncher::0 * #ffa0a0
+		DrawMode: 1
+
+	Effector: PopulationBomb
+		Range = Range
+		Speed = 35
+		Duration = BombardDuration
+		Stacks = BombardStacks
+		SupplyCost = BombardCost
+		Reload = Reload

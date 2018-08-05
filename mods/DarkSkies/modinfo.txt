@@ -1,0 +1,5 @@
+	Name: Dark Skies
+	Compatibility: 200
+	Description: <<
+		This mod has one simple goal:  To darken up the skybox (the deep space background) and present a more realistic and gritty visual balance.  The skybox has been partially desaturated and dimmed, but left at values that still allow some ambient lighting on the non-lit side of objects.
+	>>

@@ -1,0 +1,31 @@
+Building: AncientCollector
+	Name: #BLD_ANCIENT_COLLECTOR
+	Description: #BLD_ANCIENT_COLLECTOR_DESC
+	Sprite: AncientCollector
+
+	Category: ControlHubs
+
+	Size: 6x6
+
+	Base Cost: 200
+	Base Maintenance: 80
+
+	Build Time: 90
+
+	In Queue: True
+
+	RequireEither( RequireStatus(GasGiant, Hide = True), RequireStatus(IceGiant, Hide = True) )
+	RequireStatus(AncientReplicator)
+	RequireStatusToProgress(AncientReplicator)
+	RequireNotStatus(Ringworld)
+	RequireNotStatus(ArtificialPlanetoid)
+	ConflictBuilding(AncientCollector, Hide = True)
+
+	AddStatus(AncientClaim)
+	AddStatus(AncientCollector)
+
+	ProduceAllPressure(Energy)
+	ProduceAllPressure(Defense)
+	ProduceAllPressure(Research)
+	ProduceAllPressure(Influence)
+	ProduceAllPressure(Money)

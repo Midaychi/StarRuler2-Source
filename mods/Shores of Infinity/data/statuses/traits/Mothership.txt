@@ -1,0 +1,16 @@
+Status: Mothership
+	Visible To: Nobody
+
+	CountAsPlanet()
+
+	CannotFireOutsideOwnedSpace()
+
+	OnEnable(AddStatus(MothershipPopulation))
+	OnDisable(RemoveStatus(MothershipPopulation))
+
+	CopyLaborFromOrbitPlanet()
+
+	IsHomeObject()
+
+	AddStatus(CanGiveCargo) #version>=132
+	AddStatus(CanTakeCargo) #version>=132
